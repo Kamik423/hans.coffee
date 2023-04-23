@@ -1,0 +1,352 @@
+* {
+    --tint-color: #FD5C48;
+}
+
+body {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-family: Vollkorn, serif;
+    line-height: 1.5;
+    width: 100vw;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: SpaceGrotesk, sans-serif;
+    margin-top: 0px;
+    margin-bottom: 0.0pt;
+}
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #24232b;
+        color: #e8e6e3;
+    }
+}
+
+a {
+    color: var(--tint-color);
+}
+
+/*a:visited {*/
+/*    color: hsl(from var(--tint-color) h s calc(l - 20%));*/
+/*}*/
+
+a:hover {
+    color: hsl(from var(--tint-color) h s calc(l + 15%));
+}
+
+a:has(h1), a:has(h2), a:has(h3) {
+/*    text-decoration: none;*/
+    font-style: normal !important;
+}
+
+body a {
+    font-style: italic;
+    text-decoration: none;
+}
+
+body p a {
+    text-decoration: underline;
+}
+
+code {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 88%;
+}
+
+header {
+    position: sticky;
+    top: 0;
+    background-image: linear-gradient(110deg, #ff2c55ee, #fd6e42ee);
+/*    background-image: linear-gradient(110deg, #fc530abb, #ff0a42bb);*/
+    color: white;
+    -webkit-backdrop-filter: blur(1rem)  brightness(150%) saturate(150%);
+    backdrop-filter: blur(1rem)  brightness(150%) saturate(150%);
+    width: 100vw;
+    font-family: SpaceGrotesk, sans-serif;
+    /* font feature ss01 is closed a */
+    -webkit-font-feature-settings: 'ss01' 1;
+    font-feature-settings: 'ss01' 1;
+    font-size: 20pt;
+    padding-left: 0.666ex;
+    box-sizing: border-box;
+    box-shadow: 0 -2ex 1ex 2ex #FD5C4888;
+}
+
+header > * {
+    display: inline-block;
+    vertical-align: middle;
+    height: 2.5ex;
+}
+
+header > a, header > a:hover, header > a:visited {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    font-style: normal;
+}
+
+header > span:has(.icon) {
+    float: right;
+    margin: 0.666ex;
+    height: calc(min(2.5ex, 7.5vw));
+}
+
+header .icon {
+    margin-left: 0.666ex;
+    height: 100%;
+}
+
+.content {
+    width: min(775px, 100vw - 4rem);
+/*    padding: 2rem;*/
+    margin-top: 2ex;
+}
+
+.content p:first-of-type {
+    margin-top: 0pt;
+}
+
+.home-link {
+    width: 100%;
+    display: block;
+}
+
+.more-link {
+    margin-left: 1em;
+}
+
+body > .home-link {
+    width: calc(100% - 4em);
+}
+
+.article-image {
+    width: 100%;
+}
+
+.article-image > img {
+    width: 100%;
+    border-radius: 1ex;
+}
+
+.image-caption {
+    opacity: 0.75;
+    display: block;
+}
+
+.post-date {
+    font-style: italic;
+    opacity: 0.75;
+}
+
+h1 {
+    font-size: 150%;
+}
+
+h2 {
+    font-size: 100%;
+}
+
+abbr {
+    font-variant: small-caps;
+    letter-spacing: .02em;
+}
+
+body a abbr, em abbr {
+    /* Vollkorn does not support italic small caps */
+    font-style: oblique;
+    font-weight: bold;
+    font-size: 110%;
+    letter-spacing: .07em;
+}
+
+ul:has(article) {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+article {
+    display: flex;
+    width: 100%;
+}
+
+article > div {
+/*    display: inline-block;*/
+    height: 100%;
+    flex: 1;
+}
+
+footer {
+    margin-bottom: 2ex;
+    margin-top: 2ex;
+}
+
+footer span {
+    text-align: center;
+    display: block;
+    margin-top: 1ex;
+    margin-bottom: 1ex;
+}
+
+.obfuscator {
+    display: none;
+}
+
+.appicons {
+    max-width: 200px;
+    flex-basis: 100%;
+    padding-right: 20px;
+    text-align: center;
+}
+
+@media(max-width: 500px) {
+    article {
+        display: block;
+    }
+    article > div {
+        width: 100%;
+    }
+    .appicons {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
+.appicons img:first-of-type {
+    width: min(100%, 200px);
+    border-radius: 20%;
+    /*box-shadow: 0px 0px 20px #ffffff22;*/
+}
+
+.appstore-badges img {
+    height: 40px;
+}
+
+.asb-left {
+    visibility: hidden;
+    width: 100%;
+    text-align: center;
+    height: 0px;
+}
+.asb-right {
+    visibility: visible;
+    float: right;
+    max-width: 66%;
+    text-align: right;
+}
+.asb-right img {
+    margin-left: 10px;
+}
+@media(max-width: 600px) {
+    .asb-left {
+        visibility: visible;
+        height: auto;
+    }
+    .asb-right {
+        visibility: hidden;
+        height: 0px;
+    }
+}
+.asb-bottom {
+    text-align: center;
+}
+.asb-bottom img {
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+/* https://stackoverflow.com/a/8160532 */
+.tex sub, .latex sub, .latex sup {
+  text-transform: uppercase;
+}
+.tex sub, .latex sub {
+  vertical-align: -0.5ex;
+  margin-left: -0.1667em;
+  margin-right: -0.125em;
+}
+.tex, .latex, .tex sub, .latex sub {
+  font-size: 1em;
+}
+.latex sup {
+  font-size: 0.85em;
+  vertical-align: 0.15em;
+  margin-left: -0.36em;
+  margin-right: -0.15em;
+}
+
+.profilepic {
+    width: 50%;
+    border-radius: 20px;
+    float: right;
+    margin-bottom: 10px;
+    margin-left: 10px;
+}
+
+@media(max-width: 450px) {
+    .profilepic {
+        width: 100%;
+        margin-left: 0px;
+    }
+}
+
+/*---------------------*/
+
+@font-face {
+    font-family: "SpaceGrotesk";
+    src: url("/fonts/sg/SpaceGrotesk-Bold.woff2")format("woff2");
+    font-weight: bold;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "SpaceGrotesk";
+    src: url("/fonts/sg/SpaceGrotesk-Medium.woff2")format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/*---------------------*/
+
+@font-face {
+    font-family: "Vollkorn";
+    src: url("/fonts/vk/Vollkorn-Bold.woff2")format("woff2");
+    font-weight: bold;
+    font-style: normal;
+    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
+}
+
+@font-face {
+    font-family: "Vollkorn";
+    src: url("/fonts/vk/Vollkorn-Medium.woff2")format("woff2");
+    font-weight: normal;
+    font-style: normal;
+    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
+}
+
+@font-face {
+    font-family: "Vollkorn";
+    src: url("/fonts/vk/Vollkorn-BoldItalic.woff2")format("woff2");
+    font-weight: bold;
+    font-style: italic;
+    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
+}
+
+@font-face {
+    font-family: "Vollkorn";
+    src: url("/fonts/vk/Vollkorn-MediumItalic.woff2")format("woff2");
+    font-weight: normal;
+    font-style: italic;
+    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
+}
+
+/*---------------------*/
+
+@font-face {
+    font-family: "IBM Plex Mono";
+    src: url("/fonts/pm/IBMPlexMono-Medium.woff2")format("woff2");
+    font-weight: normal;
+    font-style: normal;
+}

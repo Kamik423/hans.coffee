@@ -1,0 +1,40 @@
+% !TEX program = xelatex
+
+\documentclass[border=1mm,varwidth]{standalone}
+
+\usepackage{atveryend}
+\AtVeryEndDocument{\immediate\write18{convert -density 300 impressum.pdf -colorspace RGB impressum.png}}
+
+\usepackage{fontspec}
+\setmainfont{Vollkorn}
+
+\usepackage{xcolor}
+\definecolor{mytext}{HTML}{FD5C48}
+
+\usepackage[ngerman]{babel}
+
+\pagenumbering{gobble} % No page numbers
+
+\begin{document}\color{mytext}
+Anbieter dieser Internetseite ist: \textit{\symbol{72}\symbol{97}\symbol{110}\symbol{115}\symbol{32}\symbol{83}\symbol{99}\symbol{104}\symbol{252}\symbol{108}\symbol{101}\symbol{105}\symbol{110}}
+\newline
+Anschrift: \textit{
+    \symbol{75}\symbol{114}\symbol{111}\symbol{110}\symbol{101}\symbol{110}\symbol{115}\symbol{116}\symbol{114}\symbol{97}\symbol{223}\symbol{101}\symbol{32}\symbol{53},
+    \symbol{55}\symbol{50}\symbol{48}\symbol{55}\symbol{48}\symbol{32}\symbol{84}\symbol{252}\symbol{98}\symbol{105}\symbol{110}\symbol{103}\symbol{101}\symbol{110},
+    \symbol{71}\symbol{69}\symbol{82}\symbol{77}\symbol{65}\symbol{78}\symbol{89}
+}
+\newline
+Telefon: \textit{\symbol{43}\symbol{52}\symbol{57}\symbol{32}\symbol{49}\symbol{53}\symbol{50}\symbol{32}\symbol{53}\symbol{51}\symbol{56}\symbol{48}\symbol{51}\symbol{57}\symbol{54}\symbol{55}}
+\newline
+E-Mail: \textit{\symbol{99}\symbol{111}\symbol{110}\symbol{116}\symbol{97}\symbol{99}\symbol{116}\symbol{46}\symbol{107}\symbol{97}\symbol{109}\symbol{105}\symbol{107}\symbol{52}\symbol{50}\symbol{51}\symbol{64}\symbol{103}\symbol{109}\symbol{97}\symbol{105}\symbol{108}\symbol{46}\symbol{99}\symbol{111}\symbol{109}}
+\newline
+Inhaltlich Verantwortlicher gemäß § 18 Abs. 2 MStV: \textit{\symbol{72}\symbol{97}\symbol{110}\symbol{115}\symbol{32}\symbol{83}\symbol{99}\symbol{104}\symbol{252}\symbol{108}\symbol{101}\symbol{105}\symbol{110}}
+\newline
+Berufsbezeichnung und berufsrechtliche Regelungen:
+\textit{Kleingewerbe Softwareentwicklerïn, verliehen in Bundesrepublik Deutschland}.
+\newline
+Die Europäische Kommission stellt eine Plattform zur Online-Streitbeilegung (OS) bereit:
+\textit{https://ec.europa.eu/consumers/odr/}.
+Unsere E-Mail-Adresse finden Sie oben im Impressum.
+Wir sind nicht bereit oder verpflichtet, an Streitbeilegungsverfahren vor einer Verbraucherschlichtungsstelle teilzunehmen.
+\end{document}

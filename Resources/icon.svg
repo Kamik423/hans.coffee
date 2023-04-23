@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<!-- Created with Vectornator (http://vectornator.io/) -->
+<svg height="100%" stroke-miterlimit="10" style="fill-rule:nonzero;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;" version="1.1" viewBox="0 0 16 16" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:vectornator="http://vectornator.io" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<linearGradient gradientTransform="matrix(1 0 0 1 0 0)" gradientUnits="userSpaceOnUse" id="LinearGradient" x1="0.0309584" x2="16.2261" y1="5.00628" y2="11.1268">
+<stop offset="0" stop-color="#ff2c55"/>
+<stop offset="1" stop-color="#fd6e42"/>
+</linearGradient>
+<linearGradient gradientTransform="matrix(1 0 0 1 0 0)" gradientUnits="userSpaceOnUse" id="LinearGradient_2" x1="-0.00327659" x2="15.9701" y1="4.01496" y2="11.9692">
+<stop offset="0" stop-color="#ff2c55"/>
+<stop offset="1" stop-color="#fd6e42"/>
+</linearGradient>
+</defs>
+<g id="Layer-1" vectornator:layerName="Layer 1">
+<path d="M0 0L16 0L16 16L0 16L0 0Z" fill="url(#LinearGradient)" fill-rule="nonzero" opacity="1" stroke="none" vectornator:layerName="Rectangle"/>
+<path d="M3.46875 0C1.54851 1.58946e-07 0 1.54851 0 3.46875L0 12.5312C1.58946e-07 14.4515 1.54851 16 3.46875 16L12.5312 16C14.4515 16 16 14.4515 16 12.5312L16 3.46875C16 1.54851 14.4515 0 12.5312 0L3.46875 0Z" fill="url(#LinearGradient_2)" fill-rule="nonzero" opacity="0" stroke="none"/>
+<path d="M12.36 10.704L12.36 4.928C12.36 3.664 12.568 3.424 13.432 3.344C13.544 3.04 13.544 2.736 13.544 2.368C12.904 2.4 11.944 2.416 11.208 2.416C10.472 2.416 9.352 2.4 8.792 2.368C8.792 2.72 8.824 3.104 8.904 3.344C9.768 3.44 9.976 3.664 9.976 4.928L9.976 7.168L6.024 7.168L6.024 4.928C6.024 3.664 6.232 3.424 7.096 3.344C7.192 3.04 7.208 2.736 7.208 2.368C6.568 2.4 5.592 2.416 4.872 2.416C4.136 2.416 3 2.4 2.44 2.368C2.44 2.72 2.488 3.104 2.568 3.344C3.432 3.44 3.624 3.664 3.624 4.928L3.624 10.704C3.624 11.984 3.432 12.24 2.568 12.304C2.504 12.544 2.44 12.944 2.44 13.28C3.096 13.248 4.072 13.232 4.952 13.232C5.832 13.232 6.648 13.248 7.208 13.28C7.208 12.928 7.176 12.528 7.096 12.304C6.248 12.24 6.024 11.984 6.024 10.704L6.024 8.272C7.064 8.16 8.856 8.16 9.976 8.16L9.976 10.704C9.976 11.984 9.768 12.24 8.904 12.304C8.84 12.544 8.792 12.944 8.792 13.28C9.448 13.248 10.424 13.232 11.288 13.232C12.168 13.232 12.984 13.248 13.544 13.28C13.544 12.928 13.512 12.528 13.448 12.304C12.584 12.24 12.36 11.984 12.36 10.704Z" fill="#ffffff" opacity="1" stroke="none"/>
+</g>
+</svg>
