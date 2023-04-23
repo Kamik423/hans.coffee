@@ -84,14 +84,14 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                         ).filter({ $0.sectionID.rawValue == Homepage.SectionID.apps.rawValue }),
                         site: context.site
                     )
-                    Link(url: "/blog") { H1("Blog Posts") }
-                    ItemList(
-                        items: context.allItems(
-                            sortedBy: \.date,
-                            order: .descending
-                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.blog.rawValue }),
-                        site: context.site
-                    )
+//                    Link(url: "/blog") { H1("Blog Posts") }
+//                    ItemList(
+//                        items: context.allItems(
+//                            sortedBy: \.date,
+//                            order: .descending
+//                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.blog.rawValue }),
+//                        site: context.site
+//                    )
                 }.class("content")
                 SiteFooter()
             }
