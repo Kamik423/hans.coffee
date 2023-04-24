@@ -330,7 +330,7 @@ private struct SiteHeader<Site: Website>: Component {
 //                navigation
 //            }
             Span {
-                Link(url: "mailto:%22Hans%20Schülein%22%3ccontact.kamik423@gmail.com") { Image(url: "/icons/mail.png", description: "Mail").class("icon") }
+                Link(url: "mailto:%22Hans%20Schülein%22%3cmail@hans.coffee") { Image(url: "/icons/mail.png", description: "Mail").class("icon") }
 //                Link(url: "https://twitter.com/SherlockHans") { Image(url: "/icons/twitter.svg", description: "Twitter").class("icon") }
                 Link(url: "https://mastodon.social/@SherlockHans") { Image(url: "/icons/mastodon.png", description: "Mastodon").class("icon") }
                 Link(url: "https://github.com/Kamik423") { Image(url: "/icons/github.png", description: "GitHub").class("icon") }
