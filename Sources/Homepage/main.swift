@@ -44,14 +44,17 @@ try Homepage().publish(
     }),
     plugins: [
         Plugin(name: "Fix Markdown") { context in
-            context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
+            func fixText(for html: String) -> String {
                 return html
                     .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr>$1</abbr>", options: .regularExpression)
                     .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
-            })
+            }
             context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
-                    return html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression)
-            })
+                    return fixText(for: html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression))
+                })
+            context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
+                    return fixText(for: html)
+                })
         }
     ]
 )
