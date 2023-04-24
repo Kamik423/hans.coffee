@@ -1,10 +1,12 @@
 import Foundation
 import Publish
 import Plot
+import ShellOut
+import Ink
 
 // This type acts as the configuration for your website.
 struct Homepage: Website {
-    
+
     enum SectionID: String, WebsiteSectionID {
         // Add the sections that you want your website to contain here:
         case apps
@@ -31,8 +33,28 @@ struct Homepage: Website {
 }
 
 
-try Homepage().publish(withTheme: .main)
-
+try Homepage().publish(
+    withTheme: .main,
+    deployedUsing: DeploymentMethod(name: "strato", body: { context in
+        if let folder = try? context.outputFolder(at: ".") {
+            try shellOut(to: "rsync -avz --chmod=ugo+r --delete --exclude \".*\" ./* www.hans.coffee@ssh.strato.de:~/hans.coffee", at: folder.path)
+        } else {
+            print("Output folder not accessible")
+        }
+    }),
+    plugins: [
+        Plugin(name: "Fix Markdown") { context in
+            context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
+                return html
+                    .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr>$1</abbr>", options: .regularExpression)
+                    .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
+            })
+            context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
+                    return html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression)
+            })
+        }
+    ]
+)
 
 public extension Theme {
     /// The default "Foundation" theme that Publish ships with, a very
@@ -49,33 +71,33 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
     func makeIndexHTML(for index: Publish.Index, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         return HTML(
                 .lang(context.site.language),
-                // .head(for: index, on: context.site),
-                .head(
+            // .head(for: index, on: context.site),
+            .head(
                     .encoding(.utf8),
                     .siteName(context.site.name),
                     .url(context.site.url(for: index)),
                     .title(context.site.name),
                     .description(context.site.description),
-                    //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                    .forEach(["/styles.css"], { .stylesheet($0) }),
+                //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
                     .viewport(.accordingToDevice),
                     .unwrap(context.site.favicon, { .favicon($0) }),
                     .link(
                         .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
                         .href("/apple-touch-icon.png")
-                    ),
+                ),
                     .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
                     .unwrap(index.imagePath ?? context.site.imagePath, { path in
-                        let url = context.site.url(for: path)
-                        return .socialImageLink(url)
-                    })
-                    //.meta(.name("theme-color"), .content("#FD5C48"))
-                ),
+                    let url = context.site.url(for: path)
+                    return .socialImageLink(url)
+                })
+                //.meta(.name("theme-color"), .content("#FD5C48"))
+            ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Div {
-                    Image(url: "profile.jpeg", description: "profile picture").class("profilepic")
-                    index.content.body.fixingMarkdown()
+                    Image(url: "/images/profile.jpeg", description: "profile picture").class("profilepic")
+                    index.content.body
                     Link(url: "/apps") { H1("My Apps") }
                     ItemList(
                         items: context.allItems(
@@ -147,7 +169,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Div {
-                    page.body.fixingMarkdown()
+                    page.content.body
                 }.class("content")
                 SiteFooter()
             }
@@ -197,7 +219,7 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                     + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
                         + "</p>")
             } else {
-                item.content.body.fixingMarkdown()
+                item.content.body
             }
             if !short {
                 Div {
@@ -239,7 +261,6 @@ func BlogPost(for item: Publish.Item<some Website>, short: Bool = false) throws 
     let preProcessedContent = item.content.body.html
         .replacing("<h1>", with: short ? "<a href=\"\(item.path.absoluteString)\"><h2>" : "<h1>", maxReplacements: 1)
         .replacing("</h1>", with: (short ? "</h2></a>" : "</h1>") + "<span class=\"post-date\">\(BlogPostDateFormatter.string(from: item.date))</span>", maxReplacements: 1)
-        .fixingMarkdown
     return Article {
         Div {
             if !short {
@@ -322,24 +343,5 @@ private struct SiteHeader<Site: Website>: Component {
                     .class(sectionID == selectedSelectionID ? "selected" : "")
             }
         }
-    }
-}
-
-extension String {
-    var fixingMarkdown: String {
-        return self
-            .replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression)
-            .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr>$1</abbr>", options: .regularExpression)
-            .replacingOccurrences(of: "@@@@@", with: "<span class=\"obfuscator\">@@@@@</span>")
-            .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
-//            .replacingOccurrences(of: #""(\w)"#, with: "“$1", options: .regularExpression)
-//            .replacingOccurrences(of: #"(\w)""#, with: "$1”", options: .regularExpression)
-//            .replacingOccurrences(of: "'", with: "’")
-    }
-}
-
-extension Component {
-    func fixingMarkdown(withAdditionalProcessing processing: (String) -> String = { $0 }) -> Node<Any> {
-        return Node<Any>.raw(processing(self.body.render().fixingMarkdown))
     }
 }
