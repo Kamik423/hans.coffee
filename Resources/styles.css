@@ -29,6 +29,10 @@ a {
     color: var(--tint-color);
 }
 
+.badlink {
+    color: #888;
+}
+
 /*a:visited {*/
 /*    color: hsl(from var(--tint-color) h s calc(l - 20%));*/
 /*}*/
@@ -187,8 +191,12 @@ footer {
 footer span {
     text-align: center;
     display: block;
-    margin-top: 1ex;
-    margin-bottom: 1ex;
+    margin-top: 0ex;
+    margin-bottom: 0ex;
+}
+
+hr {
+    opacity: 33.33%;
 }
 
 .obfuscator {

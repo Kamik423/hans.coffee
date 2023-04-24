@@ -99,7 +99,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Div {
-                    Image(url: "/images/profile.jpeg", description: "profile picture").class("profilepic")
+                    Image(url: "/profile.jpeg", description: "profile picture").class("profilepic")
                     index.content.body
                     Link(url: "/apps") { H1("My Apps") }
                     ItemList(
@@ -302,16 +302,17 @@ private struct SiteFooter: Component {
     var body: Component {
         Footer {
             Span {
-//                Text("Generated using ")
-//                Link("Publish", url: "https://github.com/johnsundell/publish")
-//                Text(" · ")
+                //                Text("Generated using ")
+                //                Link("Publish", url: "https://github.com/johnsundell/publish")
+                //                Text(" · ")
                 Link("Colophon", url: "/colophon")
                 Text(" · ")
                 Link(url: "/feed.rss") { Node<Any>.raw("<abbr>rss</abbr> feed") }
+            }
+            Span {
+                Link("Impressum", url: "/impressum").class("badlink")
                 Text(" · ")
-                Link("Impressum", url: "/impressum")
-                Text(" · ")
-                Link("Privacy", url: "/privacy")
+                Link("Privacy", url: "/privacy").class("badlink")
             }
         }
     }
