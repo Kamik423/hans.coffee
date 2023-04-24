@@ -4,3 +4,5 @@
 /.swiftpm
 /*.xcodeproj
 .publish
+
+.aux_LaTeX
