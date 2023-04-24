@@ -17,6 +17,7 @@ struct Homepage: Website {
         var atfLink: String?
         var iasLink: String?
         var masLink: String?
+        var appleID: Int?
     }
 
     struct ItemMetadata: WebsiteItemMetadata {
@@ -77,12 +78,12 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
             // .head(for: index, on: context.site),
             .head(
                     .encoding(.utf8),
-                    .siteName(context.site.name),
-                    .url(context.site.url(for: index)),
-                    .title(context.site.name),
-                    .description(context.site.description),
+//                    .siteName(context.site.name),
+                    .meta(.name("url"), .content(context.site.url(for: index).absoluteString)),
+                    .element(named: "title", text: context.site.name),
+                    .meta(.name("description"), .content(context.site.description)),
                 //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                .forEach(["/styles.css"], { .stylesheet($0) }),
+                    .forEach(["/styles.css"], { .stylesheet($0) }),
                     .viewport(.accordingToDevice),
                     .unwrap(context.site.favicon, { .favicon($0) }),
                     .link(
@@ -150,7 +151,28 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
     func makeItemHTML(for item: Publish.Item<Site>, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         HTML(
                 .lang(context.site.language),
-                .head(for: item, on: context.site),
+                .head(
+                        .encoding(.utf8),
+                        .meta(.name("url"), .content(context.site.url(for: item.path).absoluteString)),
+                        .element(named: "title", text: "\(context.site.name) · \(item.title)"),
+                        .meta(.name("description"), .content(context.site.description)),
+                    //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
+                        .forEach(["/styles.css"], { .stylesheet($0) }),
+                    //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
+                        .forEach(["/styles.css"], { .stylesheet($0) }),
+                        .viewport(.accordingToDevice),
+                        .unwrap(context.site.favicon, { .favicon($0) }),
+                        .link(
+                            .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                            .href("/apple-touch-icon.png")
+                    ),
+                        .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
+                        .unwrap((item.metadata as? Homepage.ItemMetadata)?.app?.appleID, { appleID in
+                                .meta(.name("apple-itunes-app"), .content("app-id=\(appleID)"))
+                        }),
+                        .unwrap(item.imagePath ?? context.site.imagePath, { path in .socialImageLink(context.site.url(for: path)) })
+                    //.meta(.name("theme-color"), .content("#FD5C48"))
+                ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Div {
