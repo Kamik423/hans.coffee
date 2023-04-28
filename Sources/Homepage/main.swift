@@ -107,7 +107,8 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                         items: context.allItems(
                             sortedBy: \.date,
                             order: .descending
-                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.apps.rawValue }),
+                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.apps.rawValue })
+                            .filter({ $0.path.string.split(separator: "/").count == 2 }),
                         site: context.site
                     )
 //                    Link(url: "/blog") { H1("Blog Posts") }
@@ -178,6 +179,8 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                 Div {
                     if let metadata = item.metadata as? Homepage.ItemMetadata, let _ = metadata.app {
                         try! App(for: item)
+                    } else if item.path.string.contains("apps") {
+                        try! AppSubSite(for: item)
                     } else {
                         try! BlogPost(for: item)
                     }
@@ -226,6 +229,10 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                 if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
                 if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
                 if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+//                if !short { Link(url: "privacy", label: { Image("/badges/pp.svg") }) }
+                if !short {
+                    Link(url: "privacy", label: { Text("Privacy Policy") } )
+                }
             }.class("appstore-badges").class(short ? "asb-left" : "")
         }.class("appicons")
         Div {
@@ -245,8 +252,6 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                         + "</p>")
             } else {
                 item.content.body
-            }
-            if !short {
                 Div {
                     if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
                     if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
@@ -256,6 +261,10 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
             }
         }.class("article-body")
     }
+}
+
+func ReturnToAppLink(for path: Path) -> Component {
+    BackLink(to: "/" + path.string.split(separator: "/").prefix(2).joined(separator: "/"), titled: String(path.string.split(separator: "/").prefix(2).last ?? "NOAPP"))
 }
 
 var ReturnToBlogLink: Component {
@@ -280,6 +289,28 @@ var ISODateFormatter: DateFormatter {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "Y-MM-dd"
     return dateFormatter
+}
+
+func AppSubSite(for item: Publish.Item<some Website>, short: Bool = false) throws -> Plot.Component {
+    let preProcessedContent = item.content.body.html
+        .replacing("<h1>", with: short ? "<a href=\"\(item.path.absoluteString)\"><h2>" : "<h1>", maxReplacements: 1)
+        .replacing("</h1>", with: (short ? "</h2></a>" : "</h1>") + "<span class=\"post-date\">\(BlogPostDateFormatter.string(from: item.date))</span>", maxReplacements: 1)
+    return Article {
+        Div {
+            if !short {
+                ReturnToHomepageLink
+                ReturnToAppLink(for: item.path)
+            }
+            Node<Any>.raw(
+                short ? preProcessedContent.components(separatedBy: "</p>").first!
+                    + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
+                    + "</p>": preProcessedContent)
+            if !short {
+                ReturnToAppLink(for: item.path)
+                ReturnToHomepageLink
+            }
+        }.class("article-body")
+    }
 }
 
 func BlogPost(for item: Publish.Item<some Website>, short: Bool = false) throws -> Plot.Component {
@@ -312,10 +343,12 @@ private struct ItemList<Site: Website>: Component {
         return List(items) { item in
             if let itemMetadata = item.metadata as? Homepage.ItemMetadata, let _ = itemMetadata.app {
                 return try! App(for: item, short: true)
+            } else if item.path.string.contains("apps") {
+                return try! AppSubSite(for: item, short: true)
             } else {
                 return try! BlogPost(for: item, short: true)
             }
-        }.class("articleList")
+        }.class("article-list")
     }
 }
 

@@ -166,7 +166,7 @@ body a abbr, em abbr {
     letter-spacing: .07em;
 }
 
-.articleList {
+.article-list {
     list-style-type: none;
     padding: 0;
     margin: 0;
@@ -283,6 +283,11 @@ hr {
   vertical-align: 0.15em;
   margin-left: -0.36em;
   margin-right: -0.15em;
+}
+
+.dlig {
+    -webkit-font-feature-settings: 'hist' 0; font-feature-settings: 'hist' 0;
+    -webkit-font-feature-settings: 'dlig' 1; font-feature-settings: 'dlig' 1;
 }
 
 .profilepic {
