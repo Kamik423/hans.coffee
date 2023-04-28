@@ -79,11 +79,11 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
             .head(
                     .encoding(.utf8),
 //                    .siteName(context.site.name),
-                    .meta(.name("url"), .content(context.site.url(for: index).absoluteString)),
+                .meta(.name("url"), .content(context.site.url(for: index).absoluteString)),
                     .element(named: "title", text: context.site.name),
                     .meta(.name("description"), .content(context.site.description)),
                 //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                    .forEach(["/styles.css"], { .stylesheet($0) }),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
                     .viewport(.accordingToDevice),
                     .unwrap(context.site.favicon, { .favicon($0) }),
                     .link(
@@ -152,27 +152,27 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
         HTML(
                 .lang(context.site.language),
                 .head(
-                        .encoding(.utf8),
-                        .meta(.name("url"), .content(context.site.url(for: item.path).absoluteString)),
-                        .element(named: "title", text: "\(context.site.name) · \(item.title)"),
-                        .meta(.name("description"), .content(context.site.description)),
-                    //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                        .forEach(["/styles.css"], { .stylesheet($0) }),
-                    //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                        .forEach(["/styles.css"], { .stylesheet($0) }),
-                        .viewport(.accordingToDevice),
-                        .unwrap(context.site.favicon, { .favicon($0) }),
-                        .link(
-                            .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
-                            .href("/apple-touch-icon.png")
-                    ),
-                        .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
-                        .unwrap((item.metadata as? Homepage.ItemMetadata)?.app?.appleID, { appleID in
-                                .meta(.name("apple-itunes-app"), .content("app-id=\(appleID)"))
-                        }),
-                        .unwrap(item.imagePath ?? context.site.imagePath, { path in .socialImageLink(context.site.url(for: path)) })
-                    //.meta(.name("theme-color"), .content("#FD5C48"))
+                    .encoding(.utf8),
+                    .meta(.name("url"), .content(context.site.url(for: item.path).absoluteString)),
+                    .element(named: "title", text: "\(context.site.name) · \(item.title)"),
+                    .meta(.name("description"), .content(context.site.description)),
+                //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
+                //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
+                    .viewport(.accordingToDevice),
+                    .unwrap(context.site.favicon, { .favicon($0) }),
+                    .link(
+                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                        .href("/apple-touch-icon.png")
                 ),
+                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
+                    .unwrap((item.metadata as? Homepage.ItemMetadata)?.app?.appleID, { appleID in
+                            .meta(.name("apple-itunes-app"), .content("app-id=\(appleID)"))
+                    }),
+                    .unwrap(item.imagePath ?? context.site.imagePath, { path in .socialImageLink(context.site.url(for: path)) })
+                //.meta(.name("theme-color"), .content("#FD5C48"))
+            ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Div {
@@ -315,7 +315,7 @@ private struct ItemList<Site: Website>: Component {
             } else {
                 return try! BlogPost(for: item, short: true)
             }
-        }
+        }.class("articleList")
     }
 }
 
@@ -355,7 +355,7 @@ private struct SiteHeader<Site: Website>: Component {
             Span {
                 Link(url: "mailto:%22Hans%20Schülein%22%3cmail@hans.coffee") { Image(url: "/icons/mail.png", description: "Mail").class("icon") }
 //                Link(url: "https://twitter.com/SherlockHans") { Image(url: "/icons/twitter.svg", description: "Twitter").class("icon") }
-                Link(url: "https://mastodon.social/@SherlockHans") { Image(url: "/icons/mastodon.png", description: "Mastodon").class("icon") }
+                Link(url: "https://mastodon.social/@SherlockHans") { Image(url: "/icons/mastodon.png", description: "Mastodon").class("icon") }.attribute(named: "rel", value: "me")
                 Link(url: "https://github.com/Kamik423") { Image(url: "/icons/github.png", description: "GitHub").class("icon") }
             }
         }

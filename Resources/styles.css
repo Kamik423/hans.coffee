@@ -9,7 +9,7 @@ body {
     align-items: center;
     font-family: Vollkorn, serif;
     line-height: 1.5;
-    width: 100vw;
+    width: 100%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -41,7 +41,7 @@ a:hover {
     color: hsl(from var(--tint-color) h s calc(l + 15%));
 }
 
-a:has(h1), a:has(h2), a:has(h3) {
+a h1, a h2, a h3 {
 /*    text-decoration: none;*/
     font-style: normal !important;
 }
@@ -92,7 +92,7 @@ header > a, header > a:hover, header > a:visited {
     font-style: normal;
 }
 
-header > span:has(.icon) {
+header > span {
     float: right;
     margin: 0.666ex;
     height: calc(min(2.5ex, 7.5vw));
@@ -166,7 +166,7 @@ body a abbr, em abbr {
     letter-spacing: .07em;
 }
 
-ul:has(article) {
+.articleList {
     list-style-type: none;
     padding: 0;
     margin: 0;
