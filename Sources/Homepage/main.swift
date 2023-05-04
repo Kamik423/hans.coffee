@@ -33,31 +33,52 @@ struct Homepage: Website {
     var imagePath: Path? = "/icon.svg"
 }
 
+let homepage = Homepage()
 
-try Homepage().publish(
-    withTheme: .main,
-    deployedUsing: DeploymentMethod(name: "strato", body: { context in
-        if let folder = try? context.outputFolder(at: ".") {
-            try shellOut(to: "rsync -avz --chmod=ugo+r --delete --exclude \".*\" ./* www.hans.coffee@ssh.strato.de:~/hans.coffee", at: folder.path)
-        } else {
-            print("Output folder not accessible")
+let plugins: [Plugin<Homepage>] = [
+    Plugin(name: "Fix Markdown") { context in
+        func fixText(for html: String) -> String {
+            return html
+                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr>$1</abbr>", options: .regularExpression)
+                .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
         }
-    }),
-    plugins: [
-        Plugin(name: "Fix Markdown") { context in
-            func fixText(for html: String) -> String {
-                return html
-                    .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr>$1</abbr>", options: .regularExpression)
-                    .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
-            }
-            context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
-                    return fixText(for: html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression))
-                })
-            context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
-                    return fixText(for: html)
-                })
-        }
-    ]
+        context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
+                return fixText(for: html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression))
+            })
+        context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
+                return fixText(for: html)
+            })
+    }
+]
+
+let deploymentMethod: DeploymentMethod<Homepage> = DeploymentMethod(name: "strato", body: { context in
+    if let folder = try? context.outputFolder(at: ".") {
+        try shellOut(to: "rsync -avz --chmod=ugo+r --delete --exclude \".*\" ./* www.hans.coffee@ssh.strato.de:~/hans.coffee", at: folder.path)
+    } else {
+        print("Output folder not accessible")
+    }
+})
+
+try homepage.publish(
+    at: nil,
+    using: [
+            .group(plugins.map(PublishingStep.installPlugin)),
+            .optional(.copyResources()),
+            .addMarkdownFiles(),
+            .sortItems(by: \.date, order: .descending),
+//        .group(additionalSteps),
+        .generateHTML(withTheme: .main, indentation: nil),
+            .unwrap(.default) { config in
+                .generateRSSFeed(
+                including: [.apps], // , .blog], // TODO add this back in once blog is active
+                itemPredicate: Predicate(matcher: { $0.path.absoluteString.components(separatedBy: "/").count == 3 }),
+                config: config
+            )
+        },
+            .generateSiteMap(indentedBy: nil),
+            .unwrap(deploymentMethod, PublishingStep.deploy)
+    ],
+    file: #file
 )
 
 public extension Theme {
@@ -231,7 +252,7 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                 if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
 //                if !short { Link(url: "privacy", label: { Image("/badges/pp.svg") }) }
                 if !short {
-                    Link(url: "privacy", label: { Text("Privacy Policy") } )
+                    Link(url: "privacy", label: { Text("Privacy Policy") })
                 }
             }.class("appstore-badges").class(short ? "asb-left" : "")
         }.class("appicons")
