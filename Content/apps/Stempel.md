@@ -32,7 +32,7 @@ This way complex projects like a website with ^html^, ^php^ and JavaScript files
 ![The file permissions editor. This allows for new files to be marked as executable.](permissions.png)
 
 One powerful feature offered by Stempel is to configure ^posix^ permissions for files.
-Each file can be individually selected to be readable, excecutable, or writable for user, group, and world.
+Each file can be individually selected to be readable, executable, or writable for user, group, and world.
 This is especially handy when creating templates for executable files such as scripting languages like Python.
 Stempel allows for this configuration to occur via a graphical representation of the familiar `ls` output as a table.
 Presets allow for a quick configuration of text and script files.
