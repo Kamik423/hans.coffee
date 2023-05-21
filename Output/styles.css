@@ -241,6 +241,11 @@ hr {
     height: 40px;
 }
 
+.asb-left2 {
+    display: flex;
+    flex-direction: column;
+}
+
 .asb-left {
     visibility: hidden;
     width: 100%;

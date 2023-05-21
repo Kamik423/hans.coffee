@@ -261,7 +261,7 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                     if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
                     Link(url: "privacy", label: { Text("Privacy Policy") })
                 }
-            }.class("appstore-badges").class(short ? "asb-left" : "")
+            }.class("appstore-badges").class(short ? "asb-left" : "").class("asb-left2")
         }.class("appicons")
         Div {
             if short {
