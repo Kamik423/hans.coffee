@@ -18,6 +18,7 @@ struct Homepage: Website {
         var iasLink: String?
         var masLink: String?
         var appleID: Int?
+        var mastodonLink: String?
     }
 
     struct ItemMetadata: WebsiteItemMetadata {
@@ -247,11 +248,12 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                 Image("/apps/\(item.title)/AppIcon.png").class("appicon")
             }
             Div {
-                if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
                 if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
                 if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+                if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
 //                if !short { Link(url: "privacy", label: { Image("/badges/pp.svg") }) }
                 if !short {
+                    if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
                     Link(url: "privacy", label: { Text("Privacy Policy") })
                 }
             }.class("appstore-badges").class(short ? "asb-left" : "")
@@ -259,9 +261,9 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
         Div {
             if short {
                 Div {
-                    if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
                     if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
                     if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+                    if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
                 }.class("appstore-badges").class("asb-right")
                 Node<Any>.raw(
                     item.content.body.html
@@ -274,9 +276,10 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
             } else {
                 item.content.body
                 Div {
-                    if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
                     if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
                     if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+                    if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
+                    if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
                 }.class("appstore-badges").class("asb-bottom")
                 ReturnToHomepageLink
             }
