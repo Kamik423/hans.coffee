@@ -1,5 +1,7 @@
 ---
 app.atfLink: https://testflight.apple.com/join/56oTaZAY
+app.masLink: https://apple.co/41U4L1a
+app.appleID: 1638437641
 ---
 
 # Stempel
