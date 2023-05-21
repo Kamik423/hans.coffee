@@ -36,11 +36,15 @@ struct Homepage: Website {
 
 let homepage = Homepage()
 
+
 let plugins: [Plugin<Homepage>] = [
     Plugin(name: "Fix Markdown") { context in
         func fixText(for html: String) -> String {
             return html
-                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr>$1</abbr>", options: .regularExpression)
+//                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr data-lc=\"$1\">$1</abbr>", options: .regularExpression)
+                .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
+                    "<abbr data-lc=\"\(match[1].value!)\"><span>\("\(match[1].value!)".uppercased())</span></abbr>"
+                })
                 .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
         }
         context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
@@ -69,13 +73,11 @@ try homepage.publish(
             .sortItems(by: \.date, order: .descending),
 //        .group(additionalSteps),
         .generateHTML(withTheme: .main, indentation: nil),
-            .unwrap(.default) { config in
-                .generateRSSFeed(
-                including: [.apps], // , .blog], // TODO add this back in once blog is active
-                itemPredicate: Predicate(matcher: { $0.path.absoluteString.components(separatedBy: "/").count == 3 }),
-                config: config
-            )
-        },
+            .generateRSSFeed(
+            including: [.apps], // , .blog], // TODO add this back in once blog is active
+            itemPredicate: Predicate(matcher: { $0.path.absoluteString.components(separatedBy: "/").count == 3 }),
+            config: .default
+        ),
             .generateSiteMap(indentedBy: nil),
             .unwrap(deploymentMethod, PublishingStep.deploy)
     ],

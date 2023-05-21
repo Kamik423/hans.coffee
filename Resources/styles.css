@@ -158,6 +158,14 @@ abbr {
     letter-spacing: .02em;
 }
 
+abbr span {
+    display: none;
+}
+
+abbr:after {
+    content: attr(data-lc);
+}
+
 body a abbr, em abbr {
     /* Vollkorn does not support italic small caps */
     font-style: oblique;
