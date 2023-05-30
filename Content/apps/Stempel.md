@@ -1,6 +1,5 @@
 ---
 app.masLink: https://apple.co/41U4L1a
-app.atfLink: https://testflight.apple.com/join/56oTaZAY
 app.appleID: 1638437641
 app.mastodonLink: https://indieapps.space/@stempel
 ---
