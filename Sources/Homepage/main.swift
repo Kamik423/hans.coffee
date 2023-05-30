@@ -135,7 +135,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                             sortedBy: \.date,
                             order: .descending
                         ).filter({ $0.sectionID.rawValue == Homepage.SectionID.apps.rawValue })
-                            .filter({ $0.path.string.split(separator: "/").count == 2 }),
+                            .filter({ ($0.metadata as? Homepage.ItemMetadata)?.app != nil }),
                         site: context.site
                     )
 //                    Link(url: "/blog") { H1("Blog Posts") }
@@ -369,7 +369,11 @@ private struct ItemList<Site: Website>: Component {
     var site: Site
 
     var body: Component {
-        return List(items) { item in
+        var itemsToUse = items
+        if items.contains(where: { ($0.metadata as? Homepage.ItemMetadata)?.app != nil }) {
+            itemsToUse = items.filter({ ($0.metadata as? Homepage.ItemMetadata)?.app != nil })
+        }
+        return List(itemsToUse) { item in
             if let itemMetadata = item.metadata as? Homepage.ItemMetadata, let _ = itemMetadata.app {
                 return try! App(for: item, short: true)
             } else if item.path.string.contains("apps") {
