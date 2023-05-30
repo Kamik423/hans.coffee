@@ -1,5 +1,4 @@
 ---
-app.atfLink: https://testflight.apple.com/join/2YMa6loZ
 app.iasLink: https://apple.co/3w26Lp9
 app.appleID: 1468880337
 ---
