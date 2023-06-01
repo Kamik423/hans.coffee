@@ -42,7 +42,7 @@ let plugins: [Plugin<Homepage>] = [
         func fixText(for html: String) -> String {
             return html
 //                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr data-lc=\"$1\">$1</abbr>", options: .regularExpression)
-                .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
+            .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
                     "<abbr data-lc='\(match[1].value!)'><span>\("\(match[1].value!)".uppercased())</span></abbr>"
                 })
                 .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
@@ -155,7 +155,20 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
     func makeSectionHTML(for section: Publish.Section<Site>, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         HTML(
                 .lang(context.site.language),
-                .head(for: section, on: context.site),
+                .head(
+                    .encoding(.utf8),
+                    .meta(.name("url"), .content(context.site.url(for: section.path).absoluteString)),
+                    .element(named: "title", text: "\(context.site.name) · \(section.title)"),
+                    .meta(.name("description"), .content(context.site.description)),
+                    .forEach(["/styles.css"], { .stylesheet($0) }),
+                    .viewport(.accordingToDevice),
+                    .unwrap(context.site.favicon, { .favicon($0) }),
+                    .link(
+                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                        .href("/apple-touch-icon.png")
+                ),
+                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)")
+            ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Text("").addLineBreak() // this is a hack but I don't care to implement an actual solution.
@@ -184,10 +197,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                     .meta(.name("url"), .content(context.site.url(for: item.path).absoluteString)),
                     .element(named: "title", text: "\(context.site.name) · \(item.title)"),
                     .meta(.name("description"), .content(context.site.description)),
-                //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                .forEach(["/styles.css"], { .stylesheet($0) }),
-                //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
-                .forEach(["/styles.css"], { .stylesheet($0) }),
+                    .forEach(["/styles.css"], { .stylesheet($0) }),
                     .viewport(.accordingToDevice),
                     .unwrap(context.site.favicon, { .favicon($0) }),
                     .link(
@@ -220,7 +230,20 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
     func makePageHTML(for page: Publish.Page, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         HTML(
                 .lang(context.site.language),
-                .head(for: page, on: context.site),
+                .head(
+                    .encoding(.utf8),
+                    .meta(.name("url"), .content(context.site.url(for: page.path).absoluteString)),
+                    .element(named: "title", text: "\(context.site.name) · \(page.title)"),
+                    .meta(.name("description"), .content(context.site.description)),
+                    .forEach(["/styles.css"], { .stylesheet($0) }),
+                    .viewport(.accordingToDevice),
+                    .unwrap(context.site.favicon, { .favicon($0) }),
+                    .link(
+                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                        .href("/apple-touch-icon.png")
+                ),
+                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)")
+            ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Div {
