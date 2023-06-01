@@ -104,7 +104,7 @@ header .icon {
 }
 
 .content {
-    width: min(775px, 100vw - 4rem);
+    width: min(775px, 100vw - max(4rem, 4vw));
 /*    padding: 2rem;*/
     margin-top: 2ex;
 }
@@ -131,7 +131,10 @@ body > .home-link {
 }
 
 .article-image > img {
-    width: 100%;
+    --width: min(100vw - 4rem, calc(100% + min(3rem, 5%)));
+    width: var(--width);
+    margin-left: calc((100% - var(--width)) * 0.5);
+    margin-right: calc((100% - var(--width)) * 0.5);
     border-radius: 1ex;
 }
 
@@ -214,7 +217,7 @@ hr {
 .appicons {
     max-width: 200px;
     flex-basis: 100%;
-    padding-right: 20px;
+    padding-right: 2rem;
     text-align: center;
 }
 
