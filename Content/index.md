@@ -1,6 +1,6 @@
 *Hallo,*
 
-I am an independent iOS/macOS app developer from Germany and I will soon be graduating with a *Master of Science in Satellite Technology*.
+I am an independent iOS/macOS app developer from Germany and I just graduated with a *Master of Science in Satellite Technology*.
 
 I have always had a keen interest in computers, software development, and Apple platforms. 
 I first taught myself Python, which I have since used almost daily for university and hobby projects. 
