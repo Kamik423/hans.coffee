@@ -8,6 +8,8 @@ body {
     flex-direction: column;
     align-items: center;
     font-family: Vollkorn, serif;
+    /* here because I cannot overwrite it when it is in @font-face and I need that for -.- */
+    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
     line-height: 1.5;
     width: 100%;
 }
@@ -204,7 +206,19 @@ footer span {
 }
 
 hr {
-    opacity: 33.33%;
+    /*    opacity: 33.33%;*/
+    border: none;
+    text-align: center;
+}
+
+hr::after {
+    content: '⋅⋅⋅ -.- ⋅⋅⋅';
+    color: var(--tint-color);
+    font-weight: lighter;
+    font-size: 20pt;
+    line-height: 0pt;
+    -webkit-font-feature-settings: 'hist' 0; font-feature-settings: 'hist' 0;
+    -webkit-font-feature-settings: 'dlig' 1; font-feature-settings: 'dlig' 1;
 }
 
 .obfuscator {
@@ -341,7 +355,6 @@ hr {
     src: url("/fonts/vk/Vollkorn-Bold.woff2")format("woff2");
     font-weight: bold;
     font-style: normal;
-    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
 }
 
 @font-face {
@@ -349,15 +362,20 @@ hr {
     src: url("/fonts/vk/Vollkorn-Medium.woff2")format("woff2");
     font-weight: normal;
     font-style: normal;
-    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
 }
+
+/*@font-face {
+    font-family: "Vollkorn";
+    src: url("/fonts/vk/Vollkorn-Regular.woff2")format("woff2");
+    font-weight: lighter;
+    font-style: normal;
+}*/
 
 @font-face {
     font-family: "Vollkorn";
     src: url("/fonts/vk/Vollkorn-BoldItalic.woff2")format("woff2");
     font-weight: bold;
     font-style: italic;
-    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
 }
 
 @font-face {
@@ -365,8 +383,14 @@ hr {
     src: url("/fonts/vk/Vollkorn-MediumItalic.woff2")format("woff2");
     font-weight: normal;
     font-style: italic;
-    -webkit-font-feature-settings: 'hist' 1; font-feature-settings: 'hist' 1;
 }
+
+/*@font-face {
+    font-family: "Vollkorn";
+    src: url("/fonts/vk/Vollkorn-RegularItalic.woff2")format("woff2");
+    font-weight: lighter;
+    font-style: italic;
+}*/
 
 /*---------------------*/
 
