@@ -36,20 +36,20 @@ struct Homepage: Website {
 
 let homepage = Homepage()
 
+func fixText(for html: String) -> String {
+    return html
+//                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr data-lc=\"$1\">$1</abbr>", options: .regularExpression)
+    // .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
+    //         "<abbr data-lc='\(match[1].value!)'><span>\("\(match[1].value!)".uppercased())</span></abbr>"
+    //     })
+        .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
+        .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
+            "<abbr><span class='real-caps'>\("\(match[1].value!)".uppercased())</span><span class='small-caps' hidden>\(match[1].value!)</span></abbr>"
+        })
+}
 
 let plugins: [Plugin<Homepage>] = [
     Plugin(name: "Fix Markdown") { context in
-        func fixText(for html: String) -> String {
-            return html
-//                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr data-lc=\"$1\">$1</abbr>", options: .regularExpression)
-            // .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
-            //         "<abbr data-lc='\(match[1].value!)'><span>\("\(match[1].value!)".uppercased())</span></abbr>"
-            //     })
-                .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
-                .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
-                    "<abbr><span class='real-caps'>\("\(match[1].value!)".uppercased())</span><span class='small-caps' hidden>\(match[1].value!)</span></abbr>"
-                })
-        }
         context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
                 return fixText(for: html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression))
             })
@@ -418,7 +418,7 @@ private struct SiteFooter: Component {
                 //                Text(" · ")
                 Link("Colophon", url: "/colophon")
                 Text(" · ")
-                Link(url: "/feed.rss") { Node<Any>.raw("<abbr>rss</abbr> feed") }
+                Link(url: "/feed.rss") { Node<Any>.raw(fixText(for: "^rss^ feed")) }
             }
             Span {
                 Link("Impressum", url: "/impressum").class("badlink")
