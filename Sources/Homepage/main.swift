@@ -42,12 +42,12 @@ let plugins: [Plugin<Homepage>] = [
         func fixText(for html: String) -> String {
             return html
 //                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr data-lc=\"$1\">$1</abbr>", options: .regularExpression)
-            .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
-                    "<abbr data-lc='\(match[1].value!)'><span>\("\(match[1].value!)".uppercased())</span></abbr>"
-                })
+            // .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
+            //         "<abbr data-lc='\(match[1].value!)'><span>\("\(match[1].value!)".uppercased())</span></abbr>"
+            //     })
                 .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
                 .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
-                    "<abbr data-lc=\"\(match[1].value!)\"><span>\("\(match[1].value!)".uppercased())</span></abbr>"
+                    "<abbr><span class='real-caps'>\("\(match[1].value!)".uppercased())</span><span class='small-caps' hidden>\(match[1].value!)</span></abbr>"
                 })
         }
         context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in

@@ -156,17 +156,14 @@ h2 {
     font-size: 100%;
 }
 
-abbr {
-    font-variant: small-caps;
-    letter-spacing: .02em;
-}
-
-abbr span {
+abbr .real-caps {
     display: none;
 }
 
-abbr:after {
-    content: attr(data-lc);
+abbr .small-caps {
+    display: inline;
+    font-variant: small-caps;
+    letter-spacing: .02em;
 }
 
 body a abbr, em abbr {
