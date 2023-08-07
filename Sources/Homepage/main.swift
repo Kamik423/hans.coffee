@@ -56,6 +56,15 @@ let plugins: [Plugin<Homepage>] = [
         context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
                 return fixText(for: html)
             })
+        // strip Smallcaps form images
+        context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
+                return html.replacing(try! Regex(#"(<img [^>]*alt=\")((?>[^"]|\\\"])+)("[^>]*>)"#), with: { match in
+                    let strippedAltText = "\(match[2].value!)".replacing(try! Regex(#"<abbr><span class='real-caps'>(.+?)<\/span><span class='small-caps' hidden>.+?<\/span><\/abbr>"#), with: { match in
+                        "\(match[1].value!)"
+                    })
+                    return "\(match[1].value!)\(strippedAltText)\(match[3].value!)"
+                })
+            })
     }
 ]
 
