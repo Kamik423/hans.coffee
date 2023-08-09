@@ -105,13 +105,13 @@ header .icon {
     height: 100%;
 }
 
-.content {
+main {
     width: min(775px, 100vw - max(4rem, 4vw));
 /*    padding: 2rem;*/
     margin-top: 2ex;
 }
 
-.content p:first-of-type {
+main p:first-of-type {
     margin-top: 0pt;
 }
 
@@ -128,21 +128,23 @@ body > .home-link {
     width: calc(100% - 4em);
 }
 
-.article-image {
+figure {
     width: 100%;
+    margin: 0pt;
 }
 
-.article-image > img {
-    --width: min(100vw - 4rem, calc(100% + min(3rem, 5%)));
+figure > img {
+    --width: min(100vw - 4rem, calc(100% + min(10rem, 7.5%)));
     width: var(--width);
     margin-left: calc((100% - var(--width)) * 0.5);
     margin-right: calc((100% - var(--width)) * 0.5);
     border-radius: 1ex;
 }
 
-.image-caption {
+figcaption {
     opacity: 0.75;
     display: block;
+    font-size: smaller;
 }
 
 .post-date {
@@ -182,14 +184,14 @@ body a abbr, em abbr {
     margin: 0;
 }
 
-article {
+main {
     display: flex;
-    width: 100%;
 }
 
-article > div {
+main > * {
 /*    display: inline-block;*/
     height: 100%;
+    width: 100%;
     flex: 1;
 }
 
@@ -225,7 +227,7 @@ hr::after {
     display: none;
 }
 
-.appicons {
+aside {
     max-width: 200px;
     flex-basis: 100%;
     padding-right: 2rem;
@@ -233,21 +235,45 @@ hr::after {
 }
 
 @media(max-width: 500px) {
-    article {
+    main {
         display: block;
     }
-    article > div {
+    main > * {
+        display: block;
         width: 100%;
-    }
-    .appicons {
         max-width: 100%;
-        width: 100%;
     }
 }
 
-.appicons img:first-of-type {
-    width: min(100%, 200px);
+.app-preview {
+    display: flex;
+}
+
+.app-preview-flavor {
+    max-width: 200px;
+    flex-basis: 100%;
+    padding-right: 2rem;
+    text-align: center;
+}
+
+.app-preview > div{
+    flex: 1;
+}
+
+@media(max-width: 500px) {
+    .app-preview {
+        display: block;
+    }
+    .app-preview > * {
+        display: block;
+        width: 100%;
+        max-width: 100%;
+    }
+}
+
+.appicon {
     border-radius: 20%;
+    width: min(100%, 200px);
     /*box-shadow: 0px 0px 20px #ffffff22;*/
 }
 

@@ -13,13 +13,13 @@ It is integrated with the Files app.
 So you can browse Dropbox, Google Drive, your git repositories, your downloads, your documents in iCloud Drive or your desktop.
 Or you can just share any file to it.
 
-![The primary screen in Hexer showing ^ascii^ and hexadecimal representation of a file. The analysis screen provides additional information about the document and the current selection.](/apps/Hexer/main.png)
+![screenshot|The primary screen in Hexer showing ^ascii^ and hexadecimal representation of a file. The analysis screen provides additional information about the document and the current selection.](/apps/Hexer/main.png)
 
 Bytes are highlighted in different colors:
 Printable characters are cyan, spaces blue, null bytes grey, control characters pink and so on.
 The colors appear across the binary, hexadecimal, and ^ascii^ column — or can just be turned off completely.
 
-![Overview of some of the themes available in Hexer. Themes can be set to always dark or light or to adapt to the system theme automatically. The right screenshot shows some of the options that can be configured, the code pages available as well as the order and visibility of the columns.](/apps/Hexer/themes-and-options.png)
+![screenshot|Overview of some of the themes available in Hexer. Themes can be set to always dark or light or to adapt to the system theme automatically. The right screenshot shows some of the options that can be configured, the code pages available as well as the order and visibility of the columns.](/apps/Hexer/themes-and-options.png)
 
 Multiple options are available to aid your inspection of files.
 Many popular themes from text editor and terminals are available.
@@ -28,9 +28,9 @@ When you copy or share text you have complete control over the formatting.
 Column counts in powers of two (8 bytes, 16, 32, ...) or in any number that fits if you so choose.
 The app supports ^ascii^, ^iso^ Latin 1 and ^ebcdic^ code pages.
 The ^ui^ is navigable by keyboard on iPad and there are shortcuts to toggle almost everything.
-Further features are left for you to discover.  
+Further features are left for you to discover.
 
-![Search sidebar in Hexer. The sidebars in the iPad app take full screen on iPhone.](/apps/Hexer/search.png)
+![screenshot|Search sidebar in Hexer. The sidebars in the iPad app take full screen on iPhone.](/apps/Hexer/search.png)
 
 You can search even large files in Hexer.
 While searching you have the option to choose the ^ascii^ or hexadecimal column in case you are looking for specific byte sequences.

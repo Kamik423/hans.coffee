@@ -60,7 +60,7 @@ Consent of the data subject is any freely given, specific, informed and unambigu
 
 Controller for the purposes of the General Data Protection Regulation (GDPR), other data protection laws applicable in Member states of the European Union and other provisions related to data protection is:
 
-![Included as image for minimal obfuscation.](/impressum/impressum.png)
+![impressum data|Included as image for minimal obfuscation.](/impressum/impressum.png)
 
 #### 3\. Collection of general data and information
 

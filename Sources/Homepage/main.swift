@@ -34,14 +34,18 @@ struct Homepage: Website {
     var imagePath: Path? = "/icon.svg"
 }
 
+public enum MainElementDefinition: ElementDefinition { public static var wrapper = Node.main }
+public typealias Main = ElementComponent<MainElementDefinition>
+public enum AsideElementDefinition: ElementDefinition { public static var wrapper = Node.aside }
+public typealias Aside = ElementComponent<AsideElementDefinition>
+public enum SectionElementDefinition: ElementDefinition { public static var wrapper = Node.section }
+public typealias HTMLSection = ElementComponent<SectionElementDefinition>
+
+
 let homepage = Homepage()
 
 func fixText(for html: String) -> String {
     return html
-//                .replacingOccurrences(of: #"\^([^\s"]+)\^(?!\S*")"#, with: "<abbr data-lc=\"$1\">$1</abbr>", options: .regularExpression)
-    // .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
-    //         "<abbr data-lc='\(match[1].value!)'><span>\("\(match[1].value!)".uppercased())</span></abbr>"
-    //     })
         .replacingOccurrences(of: #"LaTeX(?![^<>]*")"#, with: "<span class=\"latex\">L<sup>a</sup>T<sub>e</sub>X</span>", options: .regularExpression)
         .replacing(try! Regex(#"\^([^\s"]+)\^(?!\S*")"#), with: { match in
             "<abbr><span class='real-caps'>\("\(match[1].value!)".uppercased())</span><span class='small-caps' hidden>\(match[1].value!)</span></abbr>"
@@ -51,19 +55,20 @@ func fixText(for html: String) -> String {
 let plugins: [Plugin<Homepage>] = [
     Plugin(name: "Fix Markdown") { context in
         context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
-                return fixText(for: html.replacingOccurrences(of: #"<img(.+?)( alt="(.+?)")(.+?)>"#, with: #"<div class="article-image"><img $1$2$4><small class="image-caption">$3</small></div>"#, options: .regularExpression))
+                let alt = try! Regex<(Substring, Substring)>(#"<img .*alt="((?>\\"|[^"])*)".*>"#).firstMatch(in: html)?.1
+                if let alt, alt.contains("|") {
+                    // Replace images with subtitle with an actual figure
+                    return html.replacing(try! Regex(#"(<img [^>]*alt=\")((?>[^"]|\\\"])+)("[^>]*>)"#), with: { match in
+                            let components = alt.split(separator: "|", maxSplits: 1)
+                            return "<figure>\(match[1].value!)\(components[0])\(match[3].value!)<figcaption>\(fixText(for: String(components[1])))</figcaption></figure>"
+                        })
+                } else {
+                    // Just keep normal image
+                    return html
+                }
             })
         context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
                 return fixText(for: html)
-            })
-        // strip Smallcaps form images
-        context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
-                return html.replacing(try! Regex(#"(<img [^>]*alt=\")((?>[^"]|\\\"])+)("[^>]*>)"#), with: { match in
-                    let strippedAltText = "\(match[2].value!)".replacing(try! Regex(#"<abbr><span class='real-caps'>(.+?)<\/span><span class='small-caps' hidden>.+?<\/span><\/abbr>"#), with: { match in
-                        "\(match[1].value!)"
-                    })
-                    return "\(match[1].value!)\(strippedAltText)\(match[3].value!)"
-                })
             })
     }
 ]
@@ -135,27 +140,35 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
             ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
-                Div {
-                    Image(url: "/profile.jpeg", description: "profile picture").class("profilepic")
-                    index.content.body
-                    Link(url: "/apps") { H1("My Apps") }
-                    ItemList(
-                        items: context.allItems(
-                            sortedBy: \.date,
-                            order: .descending
-                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.apps.rawValue })
-                            .filter({ ($0.metadata as? Homepage.ItemMetadata)?.app != nil }),
-                        site: context.site
-                    )
-//                    Link(url: "/blog") { H1("Blog Posts") }
-//                    ItemList(
-//                        items: context.allItems(
-//                            sortedBy: \.date,
-//                            order: .descending
-//                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.blog.rawValue }),
-//                        site: context.site
-//                    )
-                }.class("content")
+                Main {
+                    Div {
+                        HTMLSection {
+                            Image(url: "/profile.jpeg", description: "profile picture").class("profilepic")
+                            index.content.body
+                        }
+                        HTMLSection {
+                            Link(url: "/apps") { H1("My Apps") }
+                            ItemList(
+                                items: context.allItems(
+                                    sortedBy: \.date,
+                                    order: .descending
+                                ).filter({ $0.sectionID.rawValue == Homepage.SectionID.apps.rawValue })
+                                    .filter({ ($0.metadata as? Homepage.ItemMetadata)?.app != nil }),
+                                site: context.site
+                            )
+                        }
+                        //                    HTMLSection {
+                        //                    Link(url: "/blog") { H1("Blog Posts") }
+                        //                    ItemList(
+                        //                        items: context.allItems(
+                        //                            sortedBy: \.date,
+                        //                            order: .descending
+                        //                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.blog.rawValue }),
+                        //                        site: context.site
+                        //                    )
+                        //                    }
+                    }
+                }
                 SiteFooter()
             }
         )
@@ -183,7 +196,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                 Text("").addLineBreak() // this is a hack but I don't care to implement an actual solution.
                 H1(html: section.title)
                 ReturnToHomepageLink
-                Div {
+                Main {
                     ItemList(
                         items: context.allItems(
                             sortedBy: \.date,
@@ -191,7 +204,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                         ).filter({ $0.sectionID.rawValue == section.id.rawValue }),
                         site: context.site
                     )
-                }.class("content")
+                }
                 ReturnToHomepageLink
                 SiteFooter()
             }
@@ -222,7 +235,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
             ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
-                Div {
+                Main {
                     if let metadata = item.metadata as? Homepage.ItemMetadata, let _ = metadata.app {
                         try! App(for: item)
                     } else if item.path.string.contains("apps") {
@@ -230,7 +243,7 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                     } else {
                         try! BlogPost(for: item)
                     }
-                }.class("content")
+                }
                 SiteFooter()
             }
         )
@@ -255,9 +268,11 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
             ),
                 .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
-                Div {
-                    page.content.body
-                }.class("content")
+                Main {
+                    Div {
+                        page.content.body
+                    }
+                }
                 SiteFooter()
             }
         )
@@ -272,16 +287,12 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
     }
 }
 
-func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Plot.Component {
+func AppPreview(for item: Publish.Item<some Website>) throws -> Plot.Component {
     guard let itemMetadata = item.metadata as? Homepage.ItemMetadata else { throw NSError(domain: "publish", code: 0) }
     guard let app = itemMetadata.app else { throw NSError(domain: "publish", code: 0) }
     return Article {
         Div {
-            if short {
-                Link(url: item.path.absoluteString) {
-                    Image("/apps/\(item.title)/AppIcon.png").class("appicon")
-                }
-            } else {
+            Link(url: item.path.absoluteString) {
                 Image("/apps/\(item.title)/AppIcon.png").class("appicon")
             }
             Div {
@@ -289,38 +300,51 @@ func App(for item: Publish.Item<some Website>, short: Bool = false) throws -> Pl
                 if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
                 if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
 //                if !short { Link(url: "privacy", label: { Image("/badges/pp.svg") }) }
-                if !short {
+            }.class("appstore-badges").class("asb-left").class("asb-left2")
+        }.class("app-preview-flavor")
+        Div {
+            Div {
+                if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
+                if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+                if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
+            }.class("appstore-badges").class("asb-right")
+            Node<Any>.raw(
+                item.content.body.html
+                    .components(separatedBy: "</p>").first!
+                    .replacingOccurrences(of: "<h1>", with: "<a href=\"\(item.path.absoluteString)\"><h1>")
+                    .replacingOccurrences(of: "</h2>", with: "</h2></a>")
+//                        .fixingMarkdown()
+                + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
+                    + "</p>")
+        }.class("app-preview-body")
+    }.class("app-preview")
+}
+
+func App(for item: Publish.Item<some Website>) throws -> Plot.Component {
+    guard let itemMetadata = item.metadata as? Homepage.ItemMetadata else { throw NSError(domain: "publish", code: 0) }
+    guard let app = itemMetadata.app else { throw NSError(domain: "publish", code: 0) }
+    return ComponentGroup {
+        Aside {
+            Image("/apps/\(item.title)/AppIcon.png").class("appicon")
+            Div {
+                if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
+                if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+                if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
+//                if !short { Link(url: "privacy", label: { Image("/badges/pp.svg") }) }
                     if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
                     Link(url: "privacy", label: { Text("Privacy Policy") })
-                }
-            }.class("appstore-badges").class(short ? "asb-left" : "").class("asb-left2")
-        }.class("appicons")
-        Div {
-            if short {
-                Div {
-                    if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
-                    if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
-                    if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
-                }.class("appstore-badges").class("asb-right")
-                Node<Any>.raw(
-                    item.content.body.html
-                        .components(separatedBy: "</p>").first!
-                        .replacingOccurrences(of: "<h1>", with: "<a href=\"\(item.path.absoluteString)\"><h1>")
-                        .replacingOccurrences(of: "</h2>", with: "</h2></a>")
-//                        .fixingMarkdown()
-                    + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
-                        + "</p>")
-            } else {
-                item.content.body
-                Div {
-                    if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
-                    if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
-                    if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
-                    if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
-                }.class("appstore-badges").class("asb-bottom")
-                ReturnToHomepageLink
-            }
-        }.class("article-body")
+            }.class("appstore-badges").class("asb-left2")
+        }
+        Article {
+            item.content.body
+            Div {
+                if let url = app.masLink { Link(url: url) { Image("/badges/mas.svg") } }
+                if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
+                if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
+                if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
+            }.class("appstore-badges").class("asb-bottom")
+            ReturnToHomepageLink
+        }
     }
 }
 
@@ -357,20 +381,18 @@ func AppSubSite(for item: Publish.Item<some Website>, short: Bool = false) throw
         .replacing("<h1>", with: short ? "<a href=\"\(item.path.absoluteString)\"><h2>" : "<h1>", maxReplacements: 1)
         .replacing("</h1>", with: (short ? "</h2></a>" : "</h1>") + "<span class=\"post-date\">\(BlogPostDateFormatter.string(from: item.date))</span>", maxReplacements: 1)
     return Article {
-        Div {
-            if !short {
-                ReturnToHomepageLink
-                ReturnToAppLink(for: item.path)
-            }
-            Node<Any>.raw(
-                short ? preProcessedContent.components(separatedBy: "</p>").first!
-                    + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
-                    + "</p>": preProcessedContent)
-            if !short {
-                ReturnToAppLink(for: item.path)
-                ReturnToHomepageLink
-            }
-        }.class("article-body")
+        if !short {
+            ReturnToHomepageLink
+            ReturnToAppLink(for: item.path)
+        }
+        Node<Any>.raw(
+            short ? preProcessedContent.components(separatedBy: "</p>").first!
+                + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
+                + "</p>": preProcessedContent)
+        if !short {
+            ReturnToAppLink(for: item.path)
+            ReturnToHomepageLink
+        }
     }
 }
 
@@ -379,20 +401,18 @@ func BlogPost(for item: Publish.Item<some Website>, short: Bool = false) throws 
         .replacing("<h1>", with: short ? "<a href=\"\(item.path.absoluteString)\"><h2>" : "<h1>", maxReplacements: 1)
         .replacing("</h1>", with: (short ? "</h2></a>" : "</h1>") + "<span class=\"post-date\">\(BlogPostDateFormatter.string(from: item.date))</span>", maxReplacements: 1)
     return Article {
-        Div {
-            if !short {
-                ReturnToHomepageLink
-                ReturnToBlogLink
-            }
-            Node<Any>.raw(
-                short ? preProcessedContent.components(separatedBy: "</p>").first!
-                    + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
-                    + "</p>": preProcessedContent)
-            if !short {
-                ReturnToBlogLink
-                ReturnToHomepageLink
-            }
-        }.class("article-body")
+        if !short {
+            ReturnToHomepageLink
+            ReturnToBlogLink
+        }
+        Node<Any>.raw(
+            short ? preProcessedContent.components(separatedBy: "</p>").first!
+                + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
+                + "</p>": preProcessedContent)
+        if !short {
+            ReturnToBlogLink
+            ReturnToHomepageLink
+        }
     }
 }
 
@@ -407,7 +427,7 @@ private struct ItemList<Site: Website>: Component {
         }
         return List(itemsToUse) { item in
             if let itemMetadata = item.metadata as? Homepage.ItemMetadata, let _ = itemMetadata.app {
-                return try! App(for: item, short: true)
+                return try! AppPreview(for: item)
             } else if item.path.string.contains("apps") {
                 return try! AppSubSite(for: item, short: true)
             } else {
