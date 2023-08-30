@@ -70,6 +70,19 @@ let plugins: [Plugin<Homepage>] = [
         context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
                 return fixText(for: html)
             })
+    },
+    Plugin(name: "Syntax Highlighting") { context in
+        context.markdownParser.addModifier(Modifier(target: .codeBlocks) { html, markdown in
+                let firstLine = markdown.split(separator: "\n").first ?? ""
+                let language = firstLine.replacingOccurrences(of: "`", with: "")
+                let escapedCode = String(markdown.split(separator: "\n", maxSplits: 1).last!.reversed().split(separator: "\n", maxSplits: 1).last!.reversed())
+                    .replacingOccurrences(of: "\\", with: "\\\\")
+                    .replacingOccurrences(of: "\"", with: "\\\"")
+//                .replacingOccurrences(of: "\n", with: "\\n")
+                let echoCode = "echo \"\(escapedCode)\""
+                let pygmentizeCommand = "pygmentize -f html -O wrapcode=True \(language == "" ? "" : "-l \(language)")"
+                return (try? shellOut(to: "\(echoCode) | \(pygmentizeCommand)")) ?? "///ERROR///"
+            })
     }
 ]
 
@@ -91,7 +104,7 @@ try homepage.publish(
 //        .group(additionalSteps),
         .generateHTML(withTheme: .main, indentation: nil),
             .generateRSSFeed(
-            including: [.apps], // , .blog], // TODO add this back in once blog is active
+            including: [.apps, .blog],
             itemPredicate: Predicate(matcher: { $0.path.absoluteString.components(separatedBy: "/").count == 3 }),
             config: .default
         ),
@@ -157,16 +170,16 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
                                 site: context.site
                             )
                         }
-                        //                    HTMLSection {
-                        //                    Link(url: "/blog") { H1("Blog Posts") }
-                        //                    ItemList(
-                        //                        items: context.allItems(
-                        //                            sortedBy: \.date,
-                        //                            order: .descending
-                        //                        ).filter({ $0.sectionID.rawValue == Homepage.SectionID.blog.rawValue }),
-                        //                        site: context.site
-                        //                    )
-                        //                    }
+                        HTMLSection {
+                            Link(url: "/blog") { H1("Blog Posts") }
+                            ItemList(
+                                items: context.allItems(
+                                    sortedBy: \.date,
+                                    order: .descending
+                                ).filter({ $0.sectionID.rawValue == Homepage.SectionID.blog.rawValue }),
+                                site: context.site
+                            )
+                        }
                     }
                 }
                 SiteFooter()
@@ -331,8 +344,8 @@ func App(for item: Publish.Item<some Website>) throws -> Plot.Component {
                 if let url = app.iasLink { Link(url: url) { Image("/badges/ias.svg") } }
                 if let url = app.atfLink { Link(url: url) { Image("/badges/atf.svg") } }
 //                if !short { Link(url: "privacy", label: { Image("/badges/pp.svg") }) }
-                    if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
-                    Link(url: "privacy", label: { Text("Privacy Policy") })
+                if let url = app.mastodonLink { (Link(url: url) { Image("/badges/mastodon.svg") }).attribute(named: "rel", value: "me") }
+                Link(url: "privacy", label: { Text("Privacy Policy") })
             }.class("appstore-badges").class("asb-left2")
         }
         Article {
