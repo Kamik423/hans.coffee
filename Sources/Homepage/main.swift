@@ -78,6 +78,7 @@ let plugins: [Plugin<Homepage>] = [
                 let escapedCode = String(markdown.split(separator: "\n", maxSplits: 1).last!.reversed().split(separator: "\n", maxSplits: 1).last!.reversed())
                     .replacingOccurrences(of: "\\", with: "\\\\")
                     .replacingOccurrences(of: "\"", with: "\\\"")
+                    .replacingOccurrences(of: "`", with: "\\`")
 //                .replacingOccurrences(of: "\n", with: "\\n")
                 let echoCode = "echo \"\(escapedCode)\""
                 let pygmentizeCommand = "pygmentize -f html -O wrapcode=True \(language == "" ? "" : "-l \(language)")"
