@@ -1,12 +1,11 @@
 import Foundation
-import Publish
-import Plot
-import ShellOut
 import Ink
+import Plot
+import Publish
+import ShellOut
 
 // This type acts as the configuration for your website.
 struct Homepage: Website {
-
     enum SectionID: String, WebsiteSectionID {
         // Add the sections that you want your website to contain here:
         case apps
@@ -41,7 +40,6 @@ public typealias Aside = ElementComponent<AsideElementDefinition>
 public enum SectionElementDefinition: ElementDefinition { public static var wrapper = Node.section }
 public typealias HTMLSection = ElementComponent<SectionElementDefinition>
 
-
 let homepage = Homepage()
 
 func fixText(for html: String) -> String {
@@ -54,37 +52,37 @@ func fixText(for html: String) -> String {
 
 let plugins: [Plugin<Homepage>] = [
     Plugin(name: "Fix Markdown") { context in
-        context.markdownParser.addModifier(Modifier(target: .images) { html, markdown in
-                let alt = try! Regex<(Substring, Substring)>(#"<img .*alt="((?>\\"|[^"])*)".*>"#).firstMatch(in: html)?.1
-                if let alt, alt.contains("|") {
-                    // Replace images with subtitle with an actual figure
-                    return html.replacing(try! Regex(#"(<img [^>]*alt=\")((?>[^"]|\\\"])+)("[^>]*>)"#), with: { match in
-                            let components = alt.split(separator: "|", maxSplits: 1)
-                            return "<figure>\(match[1].value!)\(components[0])\(match[3].value!)<figcaption>\(fixText(for: String(components[1])))</figcaption></figure>"
-                        })
-                } else {
-                    // Just keep normal image
-                    return html
-                }
-            })
-        context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, markdown in
-                return fixText(for: html)
-            })
+        context.markdownParser.addModifier(Modifier(target: .images) { html, _ in
+            let alt = try! Regex<(Substring, Substring)>(#"<img .*alt="((?>\\"|[^"])*)".*>"#).firstMatch(in: html)?.1
+            if let alt, alt.contains("|") {
+                // Replace images with subtitle with an actual figure
+                return html.replacing(try! Regex(#"(<img [^>]*alt=\")((?>[^"]|\\\"])+)("[^>]*>)"#), with: { match in
+                    let components = alt.split(separator: "|", maxSplits: 1)
+                    return "<figure>\(match[1].value!)\(components[0])\(match[3].value!)<figcaption>\(fixText(for: String(components[1])))</figcaption></figure>"
+                })
+            } else {
+                // Just keep normal image
+                return html
+            }
+        })
+        context.markdownParser.addModifier(Modifier(target: .paragraphs) { html, _ in
+            fixText(for: html)
+        })
     },
     Plugin(name: "Syntax Highlighting") { context in
-        context.markdownParser.addModifier(Modifier(target: .codeBlocks) { html, markdown in
-                let firstLine = markdown.split(separator: "\n").first ?? ""
-                let language = firstLine.replacingOccurrences(of: "`", with: "")
-                let escapedCode = String(markdown.split(separator: "\n", maxSplits: 1).last!.reversed().split(separator: "\n", maxSplits: 1).last!.reversed())
-                    .replacingOccurrences(of: "\\", with: "\\\\")
-                    .replacingOccurrences(of: "\"", with: "\\\"")
-                    .replacingOccurrences(of: "`", with: "\\`")
+        context.markdownParser.addModifier(Modifier(target: .codeBlocks) { _, markdown in
+            let firstLine = markdown.split(separator: "\n").first ?? ""
+            let language = firstLine.replacingOccurrences(of: "`", with: "")
+            let escapedCode = String(markdown.split(separator: "\n", maxSplits: 1).last!.reversed().split(separator: "\n", maxSplits: 1).last!.reversed())
+                .replacingOccurrences(of: "\\", with: "\\\\")
+                .replacingOccurrences(of: "\"", with: "\\\"")
+                .replacingOccurrences(of: "`", with: "\\`")
 //                .replacingOccurrences(of: "\n", with: "\\n")
-                let echoCode = "echo \"\(escapedCode)\""
-                let pygmentizeCommand = "pygmentize -f html -O wrapcode=True \(language == "" ? "" : "-l \(language)")"
-                return (try? shellOut(to: "\(echoCode) | \(pygmentizeCommand)")) ?? "///ERROR///"
-            })
-    }
+            let echoCode = "echo \"\(escapedCode)\""
+            let pygmentizeCommand = "pygmentize -f html -O wrapcode=True \(language == "" ? "" : "-l \(language)")"
+            return (try? shellOut(to: "\(echoCode) | \(pygmentizeCommand)")) ?? "///ERROR///"
+        })
+    },
 ]
 
 let deploymentMethod: DeploymentMethod<Homepage> = DeploymentMethod(name: "strato", body: { context in
@@ -98,19 +96,22 @@ let deploymentMethod: DeploymentMethod<Homepage> = DeploymentMethod(name: "strat
 try homepage.publish(
     at: nil,
     using: [
-            .group(plugins.map(PublishingStep.installPlugin)),
-            .optional(.copyResources()),
-            .addMarkdownFiles(),
-            .sortItems(by: \.date, order: .descending),
-//        .group(additionalSteps),
+        .group(plugins.map(PublishingStep.installPlugin)),
+        .optional(.copyResources()),
+        .addMarkdownFiles(),
+        .sortItems(by: \.date, order: .descending),
         .generateHTML(withTheme: .main, indentation: nil),
-            .generateRSSFeed(
+        .mutateAllItems(using: { page in
+            // remove title from all pages so the RSS feed does not include them.
+            page.body.html = page.body.html.replacing(try! Regex(#"^<h1.*?>.*?<\/h1>"#), with: "")
+        }),
+        .generateRSSFeed(
             including: [.apps, .blog],
             itemPredicate: Predicate(matcher: { $0.path.absoluteString.components(separatedBy: "/").count == 3 }),
             config: .default
         ),
-            .generateSiteMap(indentedBy: nil),
-            .unwrap(deploymentMethod, PublishingStep.deploy)
+        .generateSiteMap(indentedBy: nil),
+        .unwrap(deploymentMethod, PublishingStep.deploy),
     ],
     file: #file
 )
@@ -129,30 +130,30 @@ public extension Theme {
 private struct MainHTMLFactory<Site: Website>: HTMLFactory {
     func makeIndexHTML(for index: Publish.Index, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         return HTML(
-                .lang(context.site.language),
+            .lang(context.site.language),
             // .head(for: index, on: context.site),
             .head(
-                    .encoding(.utf8),
+                .encoding(.utf8),
 //                    .siteName(context.site.name),
                 .meta(.name("url"), .content(context.site.url(for: index).absoluteString)),
-                    .element(named: "title", text: context.site.name),
-                    .meta(.name("description"), .content(context.site.description)),
-                //.twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
+                .element(named: "title", text: context.site.name),
+                .meta(.name("description"), .content(context.site.description)),
+                // .twitterCardType(index.imagePath == nil ? .summary : .summaryLargeImage),
                 .forEach(["/styles.css"], { .stylesheet($0) }),
-                    .viewport(.accordingToDevice),
-                    .unwrap(context.site.favicon, { .favicon($0) }),
-                    .link(
-                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
-                        .href("/apple-touch-icon.png")
+                .viewport(.accordingToDevice),
+                .unwrap(context.site.favicon, { .favicon($0) }),
+                .link(
+                    .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                    .href("/apple-touch-icon.png")
                 ),
-                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
-                    .unwrap(index.imagePath ?? context.site.imagePath, { path in
+                .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
+                .unwrap(index.imagePath ?? context.site.imagePath, { path in
                     let url = context.site.url(for: path)
                     return .socialImageLink(url)
                 })
-                //.meta(.name("theme-color"), .content("#FD5C48"))
+                // .meta(.name("theme-color"), .content("#FD5C48"))
             ),
-                .body {
+            .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Main {
                     Div {
@@ -190,22 +191,22 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
 
     func makeSectionHTML(for section: Publish.Section<Site>, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         HTML(
-                .lang(context.site.language),
-                .head(
-                    .encoding(.utf8),
-                    .meta(.name("url"), .content(context.site.url(for: section.path).absoluteString)),
-                    .element(named: "title", text: "\(context.site.name) · \(section.title)"),
-                    .meta(.name("description"), .content(context.site.description)),
-                    .forEach(["/styles.css"], { .stylesheet($0) }),
-                    .viewport(.accordingToDevice),
-                    .unwrap(context.site.favicon, { .favicon($0) }),
-                    .link(
-                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
-                        .href("/apple-touch-icon.png")
+            .lang(context.site.language),
+            .head(
+                .encoding(.utf8),
+                .meta(.name("url"), .content(context.site.url(for: section.path).absoluteString)),
+                .element(named: "title", text: "\(context.site.name) · \(section.title)"),
+                .meta(.name("description"), .content(context.site.description)),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
+                .viewport(.accordingToDevice),
+                .unwrap(context.site.favicon, { .favicon($0) }),
+                .link(
+                    .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                    .href("/apple-touch-icon.png")
                 ),
-                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)")
+                .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)")
             ),
-                .body {
+            .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Text("").addLineBreak() // this is a hack but I don't care to implement an actual solution.
                 H1(html: section.title)
@@ -227,27 +228,27 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
 
     func makeItemHTML(for item: Publish.Item<Site>, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         HTML(
-                .lang(context.site.language),
-                .head(
-                    .encoding(.utf8),
-                    .meta(.name("url"), .content(context.site.url(for: item.path).absoluteString)),
-                    .element(named: "title", text: "\(context.site.name) · \(item.title)"),
-                    .meta(.name("description"), .content(context.site.description)),
-                    .forEach(["/styles.css"], { .stylesheet($0) }),
-                    .viewport(.accordingToDevice),
-                    .unwrap(context.site.favicon, { .favicon($0) }),
-                    .link(
-                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
-                        .href("/apple-touch-icon.png")
+            .lang(context.site.language),
+            .head(
+                .encoding(.utf8),
+                .meta(.name("url"), .content(context.site.url(for: item.path).absoluteString)),
+                .element(named: "title", text: "\(context.site.name) · \(item.title)"),
+                .meta(.name("description"), .content(context.site.description)),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
+                .viewport(.accordingToDevice),
+                .unwrap(context.site.favicon, { .favicon($0) }),
+                .link(
+                    .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                    .href("/apple-touch-icon.png")
                 ),
-                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
-                    .unwrap((item.metadata as? Homepage.ItemMetadata)?.app?.appleID, { appleID in
-                            .meta(.name("apple-itunes-app"), .content("app-id=\(appleID)"))
-                    }),
-                    .unwrap(item.imagePath ?? context.site.imagePath, { path in .socialImageLink(context.site.url(for: path)) })
-                //.meta(.name("theme-color"), .content("#FD5C48"))
+                .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)"),
+                .unwrap((item.metadata as? Homepage.ItemMetadata)?.app?.appleID, { appleID in
+                    .meta(.name("apple-itunes-app"), .content("app-id=\(appleID)"))
+                }),
+                .unwrap(item.imagePath ?? context.site.imagePath, { path in .socialImageLink(context.site.url(for: path)) })
+                // .meta(.name("theme-color"), .content("#FD5C48"))
             ),
-                .body {
+            .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Main {
                     if let metadata = item.metadata as? Homepage.ItemMetadata, let _ = metadata.app {
@@ -265,22 +266,22 @@ private struct MainHTMLFactory<Site: Website>: HTMLFactory {
 
     func makePageHTML(for page: Publish.Page, context: Publish.PublishingContext<Site>) throws -> Plot.HTML {
         HTML(
-                .lang(context.site.language),
-                .head(
-                    .encoding(.utf8),
-                    .meta(.name("url"), .content(context.site.url(for: page.path).absoluteString)),
-                    .element(named: "title", text: "\(context.site.name) · \(page.title)"),
-                    .meta(.name("description"), .content(context.site.description)),
-                    .forEach(["/styles.css"], { .stylesheet($0) }),
-                    .viewport(.accordingToDevice),
-                    .unwrap(context.site.favicon, { .favicon($0) }),
-                    .link(
-                        .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
-                        .href("/apple-touch-icon.png")
+            .lang(context.site.language),
+            .head(
+                .encoding(.utf8),
+                .meta(.name("url"), .content(context.site.url(for: page.path).absoluteString)),
+                .element(named: "title", text: "\(context.site.name) · \(page.title)"),
+                .meta(.name("description"), .content(context.site.description)),
+                .forEach(["/styles.css"], { .stylesheet($0) }),
+                .viewport(.accordingToDevice),
+                .unwrap(context.site.favicon, { .favicon($0) }),
+                .link(
+                    .rel(HTMLLinkRelationship(rawValue: "apple-touch-icon")!),
+                    .href("/apple-touch-icon.png")
                 ),
-                    .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)")
+                .rssFeedLink(Path.defaultForRSSFeed.absoluteString, title: "Subscribe to \(context.site.name)")
             ),
-                .body {
+            .body {
                 SiteHeader(context: context, selectedSelectionID: nil)
                 Main {
                     Div {
@@ -328,7 +329,7 @@ func AppPreview(for item: Publish.Item<some Website>) throws -> Plot.Component {
                     .replacingOccurrences(of: "<h1>", with: "<a href=\"\(item.path.absoluteString)\"><h1>")
                     .replacingOccurrences(of: "</h2>", with: "</h2></a>")
 //                        .fixingMarkdown()
-                + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
+                    + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
                     + "</p>")
         }.class("app-preview-body")
     }.class("app-preview")
@@ -402,7 +403,7 @@ func AppSubSite(for item: Publish.Item<some Website>, short: Bool = false) throw
         Node<Any>.raw(
             short ? preProcessedContent.components(separatedBy: "</p>").first!
                 + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
-                + "</p>": preProcessedContent)
+                + "</p>" : preProcessedContent)
         if !short {
             ReturnToAppLink(for: item.path)
             ReturnToHomepageLink
@@ -422,7 +423,7 @@ func BlogPost(for item: Publish.Item<some Website>, short: Bool = false) throws 
         Node<Any>.raw(
             short ? preProcessedContent.components(separatedBy: "</p>").first!
                 + "<a href=\"\(item.path.absoluteString)\" class=\"more-link\">Read more&#8230;</a>"
-                + "</p>": preProcessedContent)
+                + "</p>" : preProcessedContent)
         if !short {
             ReturnToBlogLink
             ReturnToHomepageLink
@@ -450,7 +451,6 @@ private struct ItemList<Site: Website>: Component {
         }.class("article-list")
     }
 }
-
 
 private struct SiteFooter: Component {
     var body: Component {
